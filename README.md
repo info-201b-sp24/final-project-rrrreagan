@@ -1,7 +1,12 @@
-# Title of Your Final Project Here 
+# Seattle Crime Trends from 1975-2018 
 ## INFO 201 "Foundational Skills for Data Science"
 
-Authors: Your names here
+Authors: 
+
+Reagan Ince (rince@uw.edu)\
+Maya Odenheim (mayaoden@uw.edu)\
+Eda Gokdogan (egokdoga@uw.edu)\
+Thu Rain Htet (thu97@uw.edu)\
 
 
 For the Final Project -- Data Wrangling, add the following to this code repository:

@@ -1,28 +1,26 @@
-# Load libraries
+library(shiny)
 library(dplyr)
 library(tidyr)
 
-# Read the data
-crime_data <- read.csv("crime_data.csv")
+crime_data <- read.csv("Crime_Data.csv")
 
-# Process data and calculate summary table
+# Summary table calculation
 summary_table <- crime_data %>%
-  mutate(Year = as.numeric(format(as.Date(Occurred.Date, "%m/%d/%Y"), "%Y"))) %>%
+  mutate(Year = as.integer(format(as.Date(Occurred.Date, "%m/%d/%Y"), "%Y"))) %>%
   count(Year, Primary.Offense.Description) %>%
   pivot_wider(names_from = Primary.Offense.Description, values_from = n, values_fill = 0) %>%
   mutate(
-    # Calculate overall crime count
     Overall_Crime_Count = rowSums(across(where(is.numeric)))
   ) %>%
   select(Year, Overall_Crime_Count, everything()) %>%
   rename_all(~gsub("\\.", " ", .)) %>%
-  select(Year, Overall_Crime_Count, everything()) %>% # Keep Year and Overall_Crime_Count columns at the beginning
-  select(1:2, order(colnames(.))) # Reorganize columns alphabetically starting from the third column
+  select(Year, Overall_Crime_Count, everything()) %>%
+  select(1:2, order(colnames(.))) 
 
 # Summary table after 2011 function
 summary_table_after_2011 <- function(data) {
   data %>%
-    mutate(Year = as.numeric(format(as.Date(Occurred.Date, format = "%m/%d/%Y"), "%Y"))) %>%
+    mutate(Year = as.integer(format(as.Date(Occurred.Date, format = "%m/%d/%Y"), "%Y"))) %>%
     filter(Year >= 2011) %>%
     group_by(Year) %>%
     summarise(Overall_Crime_Count = n()) %>%
@@ -39,5 +37,56 @@ server <- function(input, output) {
   
   output$crimeSummaryTable <- renderTable({
     summary_table
+  })
+  
+  # Summary Info
+  output$summaryInfo <- renderPrint({
+    # Read crime data from a CSV file
+    crime_data <- read.csv("Crime_Data.csv")
+    
+    # Calculate total number of each type of crime and total crimes committed
+    crime_counts <- crime_data %>% count(Primary.Offense.Description)
+    total_crimes_committed <- sum(crime_counts$n)
+    
+    # Precinct with the highest reported number of crimes
+    precinct_max_crime <- crime_data %>% 
+      count(Precinct) %>% 
+      filter(n == max(n))
+    
+    # Most frequent subcategory of crime
+    most_frequent_subcategory <- crime_data %>% 
+      count(Crime.Subcategory) %>% 
+      filter(n == max(n))
+    
+    # Most frequent primary offense
+    most_frequent_primary_offense <- crime_data %>% 
+      count(Primary.Offense.Description) %>% 
+      filter(n == max(n))
+    
+    # Hour period with the most reports of crime
+    hour_with_most_reports <- crime_data %>%
+      mutate(Hour = format(as.POSIXct(Occurred.Time, format="%H:%M:%S"), "%H")) %>%
+      count(Hour) %>%
+      filter(n == max(n)) %>%
+      mutate(Hour_with_Most_Reports_of_Crime = paste(Hour, ":00-", Hour, ":59", sep=""))
+    
+    # Print summary information
+    cat("Total Number of Crime Types: ")
+    cat(nrow(crime_counts), "\n\n")
+    
+    cat("Total Number of Crimes Committed: ")
+    cat(total_crimes_committed, "\n\n")
+    
+    cat("Precinct with the Highest Crime Count: ")
+    cat(precinct_max_crime$Precinct, "\n\n")
+    
+    cat("Most Frequent Subcategory of Crime: ")
+    cat(most_frequent_subcategory$Crime.Subcategory, "\n\n")
+    
+    cat("Most Frequent Primary Offense: ")
+    cat(most_frequent_primary_offense$Primary.Offense.Description, "\n\n")
+    
+    cat("Hour with Most Reports of Crime: ")
+    cat(hour_with_most_reports$Hour_with_Most_Reports_of_Crime, "\n")
   })
 }

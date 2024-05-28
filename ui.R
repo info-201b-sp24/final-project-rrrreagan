@@ -150,9 +150,27 @@ ui <- fluidPage(
              tableOutput("summaryTable"),
              tableOutput("crimeSummaryTable")
     ),
+    
     tabPanel("Chart 1", 
-             plotOutput("chart1")
+             sidebarLayout(
+               sidebarPanel(
+                 p("This chart visualizes the distribution of crime in Seattle across police beats over distinct time periods. The distinct periods reflect distinct police beats as during the time period which this dataset spans, 1975-2018, the police beats have been changed three times, resulting in a total of 4 distinct police beats. By doing so, the chart provides insights into how the proportion of crimes has changed across various beats over time, highlighting areas in Seattle that consistently experience higher proportions of crimes and may serve as potential crime hotspots. It also allows for cross-comparison between different time periods to identify significant changes in crime distribution that may be attributable to shifts in policing strategies, community interventions, or socio-economic changes."),
+                 p("The color intensity on the map indicates the proportion of crimes relative to the total number of crimes in each police beat. Darker shades represent higher proportions of crimes."),
+                 p("Use the checkboxes to select the time periods you want to compare."),
+                 
+                 checkboxGroupInput("years", "Select Time Periods:",
+                                    choices = list("1975-2007" = "pre_2008",
+                                                   "2008-2015" = "2008_2015",
+                                                   "2015-2017" = "2015_2017",
+                                                   "2017-2018" = "post_2017"),
+                                    selected = c("pre_2008", "2008_2015", "2015_2017", "post_2017")),
+               ),
+               mainPanel(
+                 plotOutput("crimePlot")
+               )
+             )
     ),
+    
     tabPanel("Chart 2", 
              plotOutput("chart2")
     ),

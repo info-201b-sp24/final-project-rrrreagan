@@ -172,7 +172,7 @@ ui <- fluidPage(
                                     selected = c("pre_2008", "2008_2015", "2015_2017", "post_2017")),
                ),
                mainPanel(
-                 plotOutput("crimePlot")
+                 plotOutput("chart1")
                )
              )
     ),
@@ -185,7 +185,7 @@ ui <- fluidPage(
                ),
                
                mainPanel(
-                 plotlyOutput("crime_plot")
+                 plotlyOutput("chart2")
                )
              )
     ),

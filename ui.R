@@ -174,6 +174,7 @@ ui <- fluidPage(
     tabPanel("Chart 2", 
              sidebarLayout(
                sidebarPanel(
+                 p("This figure displays how the number of committed and reported crimes fluctuates throughout the months of the year, as well as serving as a comparison between these two metrics. Users are also able to select what crime type is displayed on the graph for further cross comparision to see how the temporal and reporting trends of crime types differ from one another."),
                  uiOutput("crimeTypeSelect")
                ),
                

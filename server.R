@@ -212,3 +212,60 @@ server <- function(input, output) {
     fig
   })
 }
+
+
+chart3 <- function(input, output) {
+  data <- reactive({
+    crime_data <- read.csv("Crime_Data.csv")
+    crime_data$Occurred.Date <- as.character(crime_data$Occurred.Date)
+    crime_data$Date <- as.Date(crimedata$Occurred.Date, tryFormats = c("%m/%d/%Y"))
+    crime_data$Month <- format(crime_data$Date, "%m")
+    crime_data <- na.omit(crime_data)
+    crime_data$Season <- sapply(crime_data$Month, function(month) {
+      month <- as.numeric(month)
+      if (month %in% c(12, 1, 2)) {
+        "Winter"
+      } else if (month %in% c(3, 4, 5)) {
+        "Spring"
+      } else if (month %in% c(6, 7, 8)) {
+        "Summer"
+      } else {
+        "Fall"
+      }
+    })
+    crime_data
+  })
+  
+  output$crimePlot <- renderPlot({
+    ggplot(data(), aes(x = Season, fill = Crime.Subcategory, na.rm=TRUE)) +
+      geom_bar(stat = "count", color= "black") +
+      ggtitle("Histogram of Crime Rates by Seasons and Types of Crimes") + 
+      xlab("Seasons") +
+      ylab("Count of Crimes") +
+      theme_minimal() + 
+      theme(
+        legend.position = "right",
+        plot.title = element_text(size = 13, face = "bold"),
+        axis.title.x = element_text(size =10, face="bold"),
+        axis.title.y = element_text(size = 10, face="bold"),
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7),
+        strip.text.y = element_text(size = 3, face = "bold"),
+        legend.title = element_text(size = 6, face = "bold"),
+        legend.text = element_text(size = 5)
+      )
+  })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

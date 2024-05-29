@@ -191,7 +191,11 @@ ui <- fluidPage(
     ),
     
     tabPanel("Chart 3", 
-             plotOutput("chart3")
+             tabPanel("Chart 3",
+                      h3("Seasonal Crime Trends in Seattle"),
+                      p("This chart displays the count of different types of crimes across different seasons."),
+                      plotOutput("seasonalCrimePlot") 
+             )
     )
   )
 )

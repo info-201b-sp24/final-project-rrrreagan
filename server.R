@@ -6,6 +6,7 @@ library(sf)
 library(gridExtra)
 library(grid)
 library(lubridate)
+library(plotly)
 
 crime_data <- read.csv("Crime_Data.csv")
 
@@ -177,7 +178,7 @@ server <- function(input, output) {
     }
   })
   
-  output$crime_plot <- renderPlot({
+  output$crime_plot <- renderPlotly({
     data <- filtered_data()  # Access the reactive filtered data
     
     num_of_crimes_per_month <- data %>%
@@ -195,18 +196,19 @@ server <- function(input, output) {
     
     combined_table <- left_join(num_of_crimes_per_month, num_of_crimes_reported_per_month, by = "month")
     
-    ggplot(combined_table) +
-      geom_point(mapping = aes(x = month, y = num_crimes, group = 1, color = "Number of Committed Crimes")) +
-      geom_line(mapping = aes(x = month, y = num_crimes, group = 1, color = "Number of Committed Crimes")) + 
-      geom_point(mapping = aes(x = month, y = num_reported_crimes, group = 1, color = "Number of Reported Crimes")) +
-      geom_line(mapping = aes(x = month, y = num_reported_crimes, group = 1, color = "Number of Reported Crimes")) + 
-      theme_minimal() + 
-      ggtitle("Number of Committed and Reported Crimes per Month") +
-      xlab("Month") +
-      ylab("Number of Crimes") +
-      theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust = 1), 
-            plot.title = element_text(hjust = 0.5, face = "bold"),
-            legend.position = c(0.825, 0.92),
-            legend.title = element_blank())  
+    fig <- plot_ly(combined_table, x = ~month, y = ~num_crimes, name = 'Committed Crimes', type = 'scatter', mode = 'lines+markers') 
+    fig <- fig %>% add_trace(y = ~num_reported_crimes, name = 'Reported Crimes', mode = 'lines+markers')
+    fig <- fig %>%
+      layout(
+        title = "Number of Committed and Reported Crimes per Month",
+        xaxis = list(title = "Month"),
+        yaxis = list(
+          title = "Number of Crimes",
+          tickformat = ",d"  # This ensures numbers are displayed with commas and without rounding
+        ),
+        hovermode = "x unified"
+      )
+    
+    fig
   })
 }

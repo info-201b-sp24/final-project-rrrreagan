@@ -172,8 +172,17 @@ ui <- fluidPage(
     ),
     
     tabPanel("Chart 2", 
-             plotOutput("chart2")
+             sidebarLayout(
+               sidebarPanel(
+                 uiOutput("crimeTypeSelect")
+               ),
+               
+               mainPanel(
+                 plotOutput("crime_plot")
+               )
+             )
     ),
+    
     tabPanel("Chart 3", 
              plotOutput("chart3")
     )

@@ -26,6 +26,12 @@ ui <- fluidPage(
   tabsetPanel(
     id = "tabs",
     tabPanel("Home", 
+             
+             div(
+               style = "position: relative;",
+               img(src = "seattle-wa_416x416.png", alt = "Photo", width = "250px", height = "250px", style = "position: absolute; top: 10px; left: 1100px;"),
+              ),
+             
              h3("Welcome to our INFO 201 Final Project:"),
              h3("Exploring Crime Trends in Seattle from 1975-2018"),
              

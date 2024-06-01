@@ -16,7 +16,7 @@ For the Final Project -- Data Wrangling, add the following to this code reposito
 * Data Nutrition Label (pdf) 
 
 
-**Link: [https://6bv8j5-reagan-ince.shinyapps.io/final-project-rrrreagan/](https://6bv8j5-reagan-ince.shinyapps.io/final-project-rrrreagan/)**
+**Link: [https://xexk8p-eda-gokdogan.shinyapps.io/final-project-rrrreagan/](https://xexk8p-eda-gokdogan.shinyapps.io/final-project-rrrreagan/)**
 
 Please create the necessary files for your multi-page Shiny app in this GitHub repository. Consult the Canvas assignment for more details. Be sure to publish your app on Shinyapps.io.
 
@@ -35,7 +35,6 @@ Within our project we intend to explore trends that exist within crime, particul
 These questions were motivated by the nature of the data we are using, as well as a curiosity in exploring larger societal trends within crime. Throughout contemporary society, many populations and communities are disproportionately criminalized. This can be examined through the criminalization of poverty, immigration status, mental illness, and race, among other identities. By exploring current occurrences of crime, we can inform potential policy change, and work to inform larger perceptions of crime, and the structural nature of their origin.
 
 For instance, many crimes originate as a result of survival or criminalization of a marginalized identity. For many immigrant communities, particularly undocumented people, they cannot obtain a driver's license. This then makes these communities especially vulnerable to targeting by law enforcement officers and felony charges. Communities of color are also targeted through vagrancy laws and other policies that defer to police discretion.
-
 
 
 # Conclusion / Summary Takeaways

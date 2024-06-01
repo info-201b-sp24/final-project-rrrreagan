@@ -171,11 +171,27 @@ ui <- fluidPage(
     ),
     tabPanel(
       "Chart 3",
-      h3("Seasonal Crime Trends in Seattle"),
-      p("This chart displays the count of different types of crimes across different seasons."),
-      plotOutput("seasonalCrimePlot")
-    ),
+      sidebarLayout(
+        sidebarPanel(
+          p("This chart displays the count of different types of crimes across different seasons. The chart reveals not only the highest crime categories but also identifies the peak seasons for these crimes, offering a seasonal perspective on criminal activities. According to the data, car prowls were the most frequent crime, with the highest occurrence in the spring season.Additionally, the chart highlights how other crime subcategories fluctuate with the seasons, providing a broader understanding of crime patterns over an extended period from 1975 to 2018."),
+          uiOutput("crimeTypeSelect")
+        ),
+        mainPanel(
+          plotlyOutput("chart3")
+          )
+        )
+      )
+   ,
     
+   tabPanel(
+     "Key Takeaways from Each Charts",
+     h3("Key Takeaways from Each Charts"),
+     p(HTML("<BR> We created three unique charts for our project.The first chart that was created focused on the police beats over distinct time periods. The fluctuations over police beats showed the user how the proportion of crimes per policde beat  increased in 2015-2017 and slightly decreased in 2017-2018. There was missing data between 1975-2007. The proportion of crimes per police beat in Seattle decreased from 2008-2015 to 2015-2017. The highest proportion of crimes per police beats in Seattle can be observed in years from 2008 to 2015. ")),
+     p(HTML("<BR> Chart 2 provided number of committed and reported crimes per categories. According to the categories, most of the number of committed and reported crimes per month were the almost similar to each other, but there were some categories that only had information about the reported crimes instead of committed crimes. The major change that I observed was mainly in the robery residential and nonviolent family offense. These categories showed a higher number of reported  crimes compared to the committed crimes, due to the reporting victims. ")),
+     p(HTML("<BR> Chart 3 provided a comprehensive analysis of crime patterns across different seasons and subcategories from 1975 to 2018. It revealed that car prowls were the most frequent type of crime, with a noticeable peak occurring in the spring season. This seasonal variation highlights how certain crimes are influenced by seasonal factors. It displays the seasons frequency for each type of crime subcategory.  The chart also underscored the significance of understanding the frequency of which crime subcategory occurred in which type of crime dataset. The high frequency is highlighted as yellow and the lowest is higlighted by purple. The middle ones highlighting as dark blue and light blue.")),
+   ) , 
+   
+  
     tabPanel(
       "Conclusion",
       h3("Conclusion + Reflection!"),
@@ -187,6 +203,7 @@ ui <- fluidPage(
       p(HTML("<BR The most important insight learned from this analysis reflects themes of critical consideration regarding the origin of statistics, and potential bias that might be introduced as we consider the way this data was collected and the actual variables it represents.")),
       p(HTML("Ultimately, the broader implication of this insight discusses trends of crime within Seattle, and can be used to inform policy change that can be used to address underlying issues of crime, namely policies that establish programs such as Housing-First to establish adequate resources for marginalized populations."))
     )
+
     
-  ),
+)
 )

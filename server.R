@@ -7,8 +7,23 @@ library(gridExtra)
 library(grid)
 library(lubridate)
 library(plotly)
+library(reshape2)
 
+library(shiny)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(plotly)
+library(sf)
+library(gridExtra)
+library(grid)
+
+# Load the data
 crime_data <- read.csv("Crime_Data.csv")
+
+# Convert date columns to Date format
+crime_data$Occurred.Date <- as.Date(crime_data$Occurred.Date, format = "%m/%d/%Y")
+crime_data$Reported.Date <- as.Date(crime_data$Reported.Date, format = "%m/%d/%Y")
 
 # Summary table calculation
 summary_table <- crime_data %>%
@@ -33,10 +48,6 @@ summary_table_after_2011 <- function(data) {
     arrange(Year)
 }
 
-# Load and prepare the data
-crime_data$Occurred.Date <- as.Date(crime_data$Occurred.Date, format = "%m/%d/%Y")
-crime_data$Reported.Date <- as.Date(crime_data$Reported.Date, format = "%m/%d/%Y")
-
 # Function to prepare data
 prepare_data <- function(dataset, date_range, shapefile) {
   dataset %>%
@@ -52,6 +63,7 @@ data_pre_2008 <- prepare_data(crime_data, c("1975-01-01", "2008-01-01"), "beat_s
 data_2008_2015 <- prepare_data(crime_data, c("2008-01-01", "2015-01-01"), "beat_shapefiles/Beats_2008_to_2015_-7708752543149594113/Beats_2008_2015_WM.shp")
 data_2015_2017 <- prepare_data(crime_data, c("2015-01-01", "2017-01-01"), "beat_shapefiles/Seattle_Police_Department_Beats_2015_to_2017_-6117309976598584571/Beats_2015_2017_WM.shp")
 data_post_2017 <- prepare_data(crime_data, c("2017-01-01", "2018-01-01"), "beat_shapefiles/Current_Beats_6794773331836576823/Beats_WM.shp")
+
 # Server function
 server <- function(input, output) {
   
@@ -66,34 +78,27 @@ server <- function(input, output) {
   
   # Summary Info
   output$summaryInfo <- renderPrint({
-
-    # Calculate total number of each type of crime and total crimes committed
     crime_counts <- crime_data %>% count(Primary.Offense.Description)
     total_crimes_committed <- sum(crime_counts$n)
     
-    # Precinct with the highest reported number of crimes
     precinct_max_crime <- crime_data %>% 
       count(Precinct) %>% 
       filter(n == max(n))
     
-    # Most frequent subcategory of crime
     most_frequent_subcategory <- crime_data %>% 
       count(Crime.Subcategory) %>% 
       filter(n == max(n))
     
-    # Most frequent primary offense
     most_frequent_primary_offense <- crime_data %>% 
       count(Primary.Offense.Description) %>% 
       filter(n == max(n))
     
-    # Hour period with the most reports of crime
     hour_with_most_reports <- crime_data %>%
       mutate(Hour = format(as.POSIXct(Occurred.Time, format="%H:%M:%S"), "%H")) %>%
       count(Hour) %>%
       filter(n == max(n)) %>%
       mutate(Hour_with_Most_Reports_of_Crime = paste(Hour, ":00-", Hour, ":59", sep=""))
     
-    # Print summary information
     cat("Total Number of Crime Types: ")
     cat(nrow(crime_counts), "\n\n")
     
@@ -161,9 +166,6 @@ server <- function(input, output) {
     grid.draw(plot_data())
   })
   
-  
-  
-  
   output$crimeTypeSelect <- renderUI({
     selectInput("crime_type", "Select Crime Type", 
                 choices = c("All", unique(crime_data$Crime.Subcategory)), selected = "All")
@@ -179,17 +181,16 @@ server <- function(input, output) {
   })
   
   output$chart2 <- renderPlotly({
-    data <- filtered_data()  # Access the reactive filtered data
+    data <- filtered_data()
     
     num_of_crimes_per_month <- data %>%
-      mutate(month = month(Occurred.Date, label = TRUE)) %>%
+      mutate(month = format(Occurred.Date, "%b")) %>%
       group_by(month) %>%
       summarise(num_crimes = n()) %>%
       na.omit()
     
-
     num_of_crimes_reported_per_month <- data %>%
-      mutate(month = month(Reported.Date, label = TRUE)) %>%
+      mutate(month = format(Reported.Date, "%b")) %>%
       group_by(month) %>%
       summarise(num_reported_crimes = n()) %>%
       na.omit()
@@ -204,7 +205,7 @@ server <- function(input, output) {
         xaxis = list(title = "Month"),
         yaxis = list(
           title = "Number of Crimes",
-          tickformat = ",d"  # This ensures numbers are displayed with commas and without rounding
+          tickformat = ",d"
         ),
         hovermode = "x unified"
       )
@@ -213,46 +214,35 @@ server <- function(input, output) {
   })
   
   
-  chart3 <- function(input, output) {
-    data <- reactive({
-      crime_data <- read.csv("Crime_Data.csv")
-      crime_data$Occurred.Date <- as.character(crime_data$Occurred.Date)
-      crime_data$Date <- as.Date(crime_data$Occurred.Date, tryFormats = c("%m/%d/%Y"))
-      crime_data$Month <- format(crime_data$Date, "%m")
-      crime_data <- na.omit(crime_data)
-      crime_data$Season <- sapply(crime_data$Month, function(month) {
-        month <- as.numeric(month)
-        if (month %in% c(12, 1, 2)) {
-          "Winter"
-        } else if (month %in% c(3, 4, 5)) {
-          "Spring"
-        } else if (month %in% c(6, 7, 8)) {
-          "Summer"
-        } else {
-          "Fall"
-        }
-      })
-      crime_data
-    })
+   data_chart3 <- reactive({
+    data <- filtered_data()
+    data$Date <- as.Date(data$Occurred.Date)
+    data$Month <- format(data$Date, "%m")
+    data$Season <- ifelse(data$Month %in% c("12", "01", "02"), "Winter", 
+                          ifelse(data$Month %in% c("03", "04", "05"), "Spring", 
+                                 ifelse(data$Month %in% c("06", "07", "08"), "Summer", "Fall")))
+    return(data)
+  })
+  
+  output$chart3 <- renderPlotly({
+    data <- data_chart3()
+    crime_counts <- data %>%
+      count(Season, Crime.Subcategory) %>%
+      spread(Crime.Subcategory, n, fill = 0)
     
-    output$crimePlot <- renderPlot({
-      ggplot(data(), aes(x = Season, fill = Crime.Subcategory, na.rm=TRUE)) +
-        geom_bar(stat = "count", color= "black") +
-        ggtitle("Histogram of Crime Rates by Seasons and Types of Crimes") + 
-        xlab("Seasons") +
-        ylab("Count of Crimes") +
-        theme_minimal() + 
-        theme(
-          legend.position = "right",
-          plot.title = element_text(size = 13, face = "bold"),
-          axis.title.x = element_text(size =10, face="bold"),
-          axis.title.y = element_text(size = 10, face="bold"),
-          axis.text.x = element_text(size = 7),
-          axis.text.y = element_text(size = 7),
-          strip.text.y = element_text(size = 3, face = "bold"),
-          legend.title = element_text(size = 6, face = "bold"),
-          legend.text = element_text(size = 5)
-        )
-    })
-  }
+    melted_data <- melt(crime_counts, id.vars = "Season")
+    
+    fig <- plot_ly(melted_data, x = ~Season, y = ~variable, z = ~value, type = 'heatmap') %>%
+      layout(
+        title = "Crime Subcategories by Season",
+        xaxis = list(title = "Season"),
+        yaxis = list(title = "Crime Subcategory")
+      )
+    
+    fig
+  })
 }
+
+
+
+ 
